@@ -14,8 +14,8 @@ class Contributions:
 
     @staticmethod
     def get_date_range(start, end):
-        start, end = start.strftime('%Y-%m-%dT%H:%M:%SZ'), end.strftime('%Y-%m-%dT%H:%M:%SZ')
         if start:
+            start, end = start.strftime('%Y-%m-%dT%H:%M:%SZ'), end.strftime('%Y-%m-%dT%H:%M:%SZ')
             return f'(from: "{start}", to: "{end}")'
         else:
             return ""
