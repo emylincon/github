@@ -75,11 +75,19 @@ class Transform:
                 data.append({"date": day["date"], "contribution": day["contributionCount"]})
         df = pd.DataFrame(data)
         df.date = pd.to_datetime(df.date, infer_datetime_format=True)
+        df['day_name'] = [df.iloc[i].date.day_name() for i in range(len(df))]
         self.tf_data = df
 
     def most_contribution_day(self):
         id_max = self.tf_data.contribution.idxmax()
         return self.tf_data.iloc[id_max]
+
+    def weekday_contributions(self):
+        return self.tf_data.groupby(by="day_name").sum().sort_values(by=['contribution'], ascending=False)
+
+    def most_weekday_contributions(self):
+        df = self.weekday_contributions()
+        return df.iloc[0]
 
 
 if __name__ == "__main__":
