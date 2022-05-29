@@ -66,6 +66,7 @@ class Contributions:
 class Transform:
     def __init__(self, data):
         self.data = data
+        self.tf_data = None
 
     def days_contribution(self):
         data = []
@@ -73,7 +74,12 @@ class Transform:
             for day in week["contributionDays"]:
                 data.append({"date": day["date"], "contribution": day["contributionCount"]})
         df = pd.DataFrame(data)
-        print(df)
+        df.date = pd.to_datetime(df.date, infer_datetime_format=True)
+        self.tf_data = df
+
+    def most_contribution_day(self):
+        id_max = self.tf_data.contribution.idxmax()
+        return self.tf_data.iloc[id_max]
 
 
 if __name__ == "__main__":
