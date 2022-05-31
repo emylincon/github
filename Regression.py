@@ -7,7 +7,8 @@ class Prep:
     def prepx(self, x: list, degree: int, include_bias: bool = False):
         if len(np.array(x).shape) == 1:
             x = np.array(x).reshape((-1, 1))
-        transformer = PolynomialFeatures(degree=degree, include_bias=include_bias)
+        transformer = PolynomialFeatures(
+            degree=degree, include_bias=include_bias)
         return transformer.fit_transform(x)
 
 
@@ -43,7 +44,7 @@ class BestModel(Prep):
     def compute_best_model(self):
         models = [self.get_model(i) for i in range(2, 10)]
         model_scores = {m.degree: m.score for m in models}
-        print(model_scores)
+        # print(model_scores)
         best = None
         for m in models:
             if best is None:
@@ -60,7 +61,7 @@ class BestModel(Prep):
                 tmp = {m: m.score, best: best.score}
                 best = max(tmp, key=tmp.get)
 
-        print("best score =", best.score, "degree =", best.degree)
+        # print("best score =", best.score, "degree =", best.degree)
         return Predictor(best.model, best.degree)
 
 
