@@ -107,6 +107,14 @@ class TestTransform(unittest.TestCase):
         data = self.trans.most_contribution_day()
         self.assertIsInstance(data.contribution, int64)
 
+    def test_average_contribution_per_month(self):
+        result = self.trans.average_contribution_per_month()
+        self.assertIsInstance(result, int)
+
+    def test_average_contribution_per_week(self):
+        result = self.trans.average_contribution_per_week()
+        self.assertIsInstance(result, int)
+
 
 if __name__ == "__main__":
     unittest.main()
