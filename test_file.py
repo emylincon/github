@@ -1,5 +1,5 @@
 import unittest
-
+import json
 from numpy import int64
 from Regression import BestModel
 from github import Contributions, Transform
@@ -79,8 +79,9 @@ class TestTransform(unittest.TestCase):
         """:arg
         this runs once at the start of test
         """
-        obj = Contributions()
-        data = obj.get_query("emylincon")
+        file_tmp = open("test/data.json")
+        data = json.load(file_tmp)
+        file_tmp.close()
         cls.trans = Transform(data)
 
     @classmethod
