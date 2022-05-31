@@ -60,14 +60,13 @@ class Contributions:
         query = {
             "query": f"{self.get_query_data(username, start_date, end_date)}"}
         response = requests.post(self.url, json=query, headers=self.header)
-        with open("res.json", "w") as f:
-            json.dump(response.json(), f)
         return response.json()
 
 
 class Transform:
     def __init__(self, data):
         self.data = data
+        self.total_contributions = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["totalContributions"]
         self.tf_data = self.days_contribution()
 
     def days_contribution(self):
@@ -103,6 +102,12 @@ class Transform:
     def least_month_contributions(self):
         df = self.month_contributions()
         return df.iloc[-1]
+
+    def average_contribution_per_month(self) -> int:
+        return round(self.total_contributions/12)
+
+    def average_contribution_per_week(self) -> int:
+        return round(self.total_contributions/52)
 
 
 if __name__ == "__main__":
