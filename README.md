@@ -3,9 +3,9 @@ git prediction project
 
 
 # Questions (use statistics)
-* which day has the most contributions?
-* which day of the week has the most contributions?
-* which month is the busiest?
+- [x] which day has the most contributions?
+- [x] which day of the week has the most contributions?
+- [x] which month is the busiest?
 * which month has the least contribution
 * on average, how many contributions per week & month
 
