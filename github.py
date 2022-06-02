@@ -3,7 +3,8 @@ import requests
 from jinja2 import Template
 import os
 import pandas as pd
-from datetime import datetime
+import datetime
+from Regression import BestModel
 
 
 class Contributions:
@@ -63,7 +64,7 @@ class Contributions:
         return response.json()
 
 
-class Transform:
+class Statistics:
     def __init__(self, data):
         self.data = data
         self.total_contributions = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["totalContributions"]
@@ -110,8 +111,47 @@ class Transform:
         return round(self.total_contributions/52)
 
 
+class ML:
+    def __init__(self, raw_data) -> None:
+        self.raw_data = raw_data
+        self.model = None
+        self.last = 1
+        self.get_model()
+
+    def data_prep(self):
+        x_series = []
+        y_series = []
+        diff = 0
+        for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
+            for day in week["contributionDays"]:
+                date = datetime.datetime.strptime(day["date"], '%Y-%m-%d')
+                x_series.append([date.month, date.day, self.last])
+                if day["contributionCount"] == 0:
+                    diff += 1
+                    y_series.append(diff)
+                else:
+                    diff = 0
+                    y_series.append(diff)
+                self.last += 1
+        return x_series, y_series
+
+    def get_model(self):
+        x, y = self.data_prep()
+        self.model = BestModel(x, y).compute_best_model()
+
+    def predict_next(self):
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+        input_data = [[tomorrow.month, tomorrow.day, self.last]]
+        raw_result = self.model.predict(input_data)
+        result = abs(round(raw_result[0]))
+        date = tomorrow + datetime.timedelta(days=result)
+        return {"days": result, "date": date}
+
+
 if __name__ == "__main__":
     obj = Contributions()
     dd = obj.get_query("emylincon")
-    tr = Transform(dd)
+    tr = Statistics(dd)
     print(tr.most_contribution_day())
+    ml = ML(dd)
+    print("ML =>", ml.predict_next())
