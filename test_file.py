@@ -2,7 +2,7 @@ import unittest
 import json
 from numpy import int64
 from Regression import BestModel
-from github import Contributions, Transform
+from github import Contributions, Statistics, ML
 
 
 class TestBasic(unittest.TestCase):
@@ -73,7 +73,7 @@ class TestContribution(unittest.TestCase):
         self.assertIsInstance(data, (list, dict))
 
 
-class TestTransform(unittest.TestCase):
+class TestStatistics(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """:arg
@@ -82,7 +82,7 @@ class TestTransform(unittest.TestCase):
         file_tmp = open("test/data.json")
         data = json.load(file_tmp)
         file_tmp.close()
-        cls.trans = Transform(data)
+        cls.trans = Statistics(data)
 
     @classmethod
     def tearDownClass(cls):
@@ -114,6 +114,41 @@ class TestTransform(unittest.TestCase):
     def test_average_contribution_per_week(self):
         result = self.trans.average_contribution_per_week()
         self.assertIsInstance(result, int)
+
+
+class TestML(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        """:arg
+        this runs once at the start of test
+        """
+        file_tmp = open("test/data.json")
+        data = json.load(file_tmp)
+        file_tmp.close()
+        cls.ml = ML(data)
+
+    @classmethod
+    def tearDownClass(cls):
+        """:arg
+        this runs once after all test is completed
+        """
+        print("teardownClass")
+
+    def setUp(self):
+        """:arg
+        this runs before each test
+        """
+        pass
+
+    def tearDown(self):
+        """:arg
+        this runs after each test
+        """
+        pass
+
+    def test_predict_next(self):
+        result = self.ml.predict_next()
+        self.assertIsInstance(result, dict)
 
 
 if __name__ == "__main__":
