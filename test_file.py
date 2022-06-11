@@ -2,7 +2,7 @@ import unittest
 import json
 from numpy import int64
 from Regression import BestModel
-from github import Contributions, Statistics, ML
+from github import Contributions, Statistics, PredictNext
 
 
 class TestBasic(unittest.TestCase):
@@ -125,7 +125,7 @@ class TestML(unittest.TestCase):
         file_tmp = open("test/data.json")
         data = json.load(file_tmp)
         file_tmp.close()
-        cls.ml = ML(data)
+        cls.ml = PredictNext(data)
 
     @classmethod
     def tearDownClass(cls):
