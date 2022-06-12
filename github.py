@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import datetime
 from Regression import BestModel
+from math import ceil
 
 
 class Contributions:
@@ -112,11 +113,33 @@ class Statistics:
 
 
 class ML:
-    def __init__(self, raw_data) -> None:
+    def __init__(self, raw_data, max_compare_length: int = 20) -> None:
         self.raw_data = raw_data
         self.model = None
-        self.last = 1
+        self.max_compare_length = max_compare_length
         self.get_model()
+
+    def data_prep(self):
+        return None
+
+    def get_model(self):
+        prepared = self.data_prep()
+        if prepared:
+            x, y = prepared
+            self.model = BestModel(
+                x, y, self.max_compare_length).compute_best_model()
+            return
+        print("[warning]: self.data_prep() returned None")
+
+
+class PredictNext(ML):
+    """
+     Predict when the date of next contribution: use distance between contributions as training data
+    """
+
+    def __init__(self, raw_data) -> None:
+        self.last = 1
+        super().__init__(raw_data=raw_data)
 
     def data_prep(self):
         x_series = []
@@ -135,23 +158,85 @@ class ML:
                 self.last += 1
         return x_series, y_series
 
-    def get_model(self):
-        x, y = self.data_prep()
-        self.model = BestModel(x, y).compute_best_model()
+    def predict_next(self) -> dict:
+        if self.model:
+            tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+            input_data = [[tomorrow.month, tomorrow.day, self.last]]
+            raw_result = self.model.predict(input_data)
+            result = abs(round(raw_result[0]))
+            date = tomorrow + datetime.timedelta(days=result)
+            return {"days": result, "date": date}
+        return {"error": "model is None"}
 
-    def predict_next(self):
-        tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
-        input_data = [[tomorrow.month, tomorrow.day, self.last]]
-        raw_result = self.model.predict(input_data)
-        result = abs(round(raw_result[0]))
-        date = tomorrow + datetime.timedelta(days=result)
-        return {"days": result, "date": date}
+
+class PredictTotalWeek(ML):
+    """
+    Predict total contributions for a given week
+    """
+
+    def __init__(self, raw_data) -> None:
+        super().__init__(raw_data=raw_data)
+
+    def week_of_month(self, dt):
+        """ 
+        Returns the week of the month for the specified date.
+        """
+        first_day = dt.replace(day=1)
+
+        dom = dt.day
+        adjusted_dom = dom + first_day.weekday()
+
+        return int(ceil(adjusted_dom/7.0))
+
+    def data_prep(self):
+        x_series = []
+        y_series = []
+        current_week_date = None
+        current_week_contribution = 0
+
+        for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
+            for day in week["contributionDays"]:
+                date = datetime.datetime.strptime(day["date"], '%Y-%m-%d')
+                if current_week_date is None:
+                    current_week_date = date
+                # If dates are in same week
+                if date.isocalendar()[1] == current_week_date.isocalendar()[1]:
+                    current_week_contribution += day["contributionCount"]
+                else:
+                    if current_week_contribution == 0:
+                        current_week_date = date
+                        continue
+                    row = [self.week_of_month(current_week_date), current_week_date.isocalendar()[
+                        1], current_week_date.month]
+                    x_series.append(row)
+                    y_series.append(current_week_contribution)
+                    # reset current week contribution
+                    current_week_contribution = day["contributionCount"]
+                    current_week_date = date
+        self.max_week_contribution = max(y_series)
+        return x_series, y_series
+
+    def predict_week(self, week_date: datetime) -> dict:
+        if self.model:
+            row = [self.week_of_month(week_date), week_date.isocalendar()[
+                1], week_date.month]
+            input_data = [row]
+            raw_result = self.model.predict(input_data)
+            result = abs(round(raw_result[0]))
+            if result > (2*self.max_week_contribution):
+                result = 0
+            return {"totalPredictedContribution": result, "weekdate": week_date}
+        return {"error": "model is None"}
 
 
 if __name__ == "__main__":
     obj = Contributions()
     dd = obj.get_query("emylincon")
-    tr = Statistics(dd)
-    print(tr.most_contribution_day())
-    ml = ML(dd)
-    print("ML =>", ml.predict_next())
+    # tr = Statistics(dd)
+    # print(tr.most_contribution_day())
+    # ml = PredictNext(dd)
+    # print("ML =>", ml.predict_next())
+    mlw = PredictTotalWeek(dd)
+    for i in range(1, 49, 7):
+        next_week = datetime.datetime.now() + datetime.timedelta(days=i)
+        print("MLW =>", mlw.predict_week(next_week))

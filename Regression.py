@@ -32,9 +32,10 @@ class Model:
 
 
 class BestModel(Prep):
-    def __init__(self, x: list, y: list) -> None:
+    def __init__(self, x: list, y: list, max_compare_length: int = 10) -> None:
         self.x = x
         self.y = np.array(y)
+        self.max_compare_length = max_compare_length
 
     def get_model(self, degree: int):
         x_ = self.prepx(self.x, degree)
@@ -42,8 +43,8 @@ class BestModel(Prep):
         return Model(x_, self.y, degree, model)
 
     def compute_best_model(self):
-        models = [self.get_model(i) for i in range(2, 10)]
-        model_scores = {m.degree: m.score for m in models}
+        models = [self.get_model(i) for i in range(2, self.max_compare_length)]
+        # model_scores = {m.degree: m.score for m in models}
         # print(model_scores)
         best = None
         for m in models:

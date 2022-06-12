@@ -2,7 +2,8 @@ import unittest
 import json
 from numpy import int64
 from Regression import BestModel
-from github import Contributions, Statistics, ML
+import datetime
+from github import Contributions, Statistics, PredictNext, PredictTotalWeek
 
 
 class TestBasic(unittest.TestCase):
@@ -125,7 +126,8 @@ class TestML(unittest.TestCase):
         file_tmp = open("test/data.json")
         data = json.load(file_tmp)
         file_tmp.close()
-        cls.ml = ML(data)
+        cls.ml = PredictNext(data)
+        cls.mlw = PredictTotalWeek(data)
 
     @classmethod
     def tearDownClass(cls):
@@ -148,6 +150,10 @@ class TestML(unittest.TestCase):
 
     def test_predict_next(self):
         result = self.ml.predict_next()
+        self.assertIsInstance(result, dict)
+
+    def test_predict_next(self):
+        result = self.mlw.predict_week(datetime.datetime.now())
         self.assertIsInstance(result, dict)
 
 
