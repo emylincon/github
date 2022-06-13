@@ -275,6 +275,22 @@ class PredictTotalMonth(ML):
         return {"error": "model is None"}
 
 
+class PredictTotalYear:
+    """
+    Predict total contributions for the current year
+    """
+
+    def __init__(self, raw_data) -> None:
+        self.raw_data = raw_data
+        self.monthModel = PredictTotalMonth(raw_data=raw_data)
+
+    def predict(self) -> dict:
+        def get_value(no): return abs(
+            round(self.monthModel.predict_month(no)["totalPredictedContribution"]))
+        result = sum(get_value(i) for i in range(1, 13))
+        return {"totalPredictedContribution": result, "year": datetime.datetime.now().year}
+
+
 if __name__ == "__main__":
     obj = Contributions()
     dd = obj.get_query("emylincon")
@@ -288,3 +304,5 @@ if __name__ == "__main__":
     #     print("MLW =>", mlw.predict_week(next_week))
     mlm = PredictTotalMonth(dd)
     print(mlm.predict_month(4))
+    mly = PredictTotalYear(dd)
+    print(mly.predict())

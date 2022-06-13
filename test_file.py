@@ -3,7 +3,7 @@ import json
 from numpy import int64
 from Regression import BestModel
 import datetime
-from github import Contributions, Statistics, PredictNext, PredictTotalWeek, PredictTotalMonth
+from github import Contributions, Statistics, PredictNext, PredictTotalWeek, PredictTotalMonth, PredictTotalYear
 
 
 class TestBasic(unittest.TestCase):
@@ -129,6 +129,7 @@ class TestML(unittest.TestCase):
         cls.ml = PredictNext(data)
         cls.mlw = PredictTotalWeek(data)
         cls.mlm = PredictTotalMonth(data)
+        cls.mly = PredictTotalYear(data)
 
     @classmethod
     def tearDownClass(cls):
@@ -149,7 +150,7 @@ class TestML(unittest.TestCase):
         """
         pass
 
-    def test_predict_week(self):
+    def test_predict_next(self):
         result = self.ml.predict_next()
         self.assertIsInstance(result, dict)
 
@@ -159,6 +160,10 @@ class TestML(unittest.TestCase):
 
     def test_predict_month(self):
         result = self.mlm.predict_month(datetime.datetime.now().month)
+        self.assertIsInstance(result, dict)
+
+    def test_predict_year(self):
+        result = self.mly.predict()
         self.assertIsInstance(result, dict)
 
 
