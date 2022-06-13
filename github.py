@@ -229,6 +229,52 @@ class PredictTotalWeek(ML):
         return {"error": "model is None"}
 
 
+class PredictTotalMonth(ML):
+    """
+    Predict total contributions for a given month
+    """
+
+    def __init__(self, raw_data) -> None:
+        super().__init__(raw_data=raw_data)
+
+    def data_prep(self):
+        x_series = []
+        y_series = []
+        current_month = None
+        current_month_contribution = 0
+
+        for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
+            for day in week["contributionDays"]:
+                date = datetime.datetime.strptime(day["date"], '%Y-%m-%d')
+                if current_month is None:
+                    current_month = date.month
+                # If dates are in same month
+                if date.month == current_month:
+                    current_month_contribution += day["contributionCount"]
+                else:
+                    if current_month_contribution == 0:
+                        current_month = date.month
+                        continue
+                    row = [current_month]
+                    x_series.append(row)
+                    y_series.append(current_month_contribution)
+                    # reset current month contribution
+                    current_month_contribution = day["contributionCount"]
+                    current_month = date.month
+        self.max_month_contribution = max(y_series)
+        return x_series, y_series
+
+    def predict_month(self, month: int) -> dict:
+        if self.model:
+            input_data = [month]
+            raw_result = self.model.predict(input_data)
+            result = abs(round(raw_result[0]))
+            if result > (3*self.max_month_contribution):
+                result = 0
+            return {"totalPredictedContribution": result, "month": month}
+        return {"error": "model is None"}
+
+
 if __name__ == "__main__":
     obj = Contributions()
     dd = obj.get_query("emylincon")
@@ -236,7 +282,9 @@ if __name__ == "__main__":
     # print(tr.most_contribution_day())
     # ml = PredictNext(dd)
     # print("ML =>", ml.predict_next())
-    mlw = PredictTotalWeek(dd)
-    for i in range(1, 49, 7):
-        next_week = datetime.datetime.now() + datetime.timedelta(days=i)
-        print("MLW =>", mlw.predict_week(next_week))
+    # mlw = PredictTotalWeek(dd)
+    # for i in range(1, 49, 7):
+    #     next_week = datetime.datetime.now() + datetime.timedelta(days=i)
+    #     print("MLW =>", mlw.predict_week(next_week))
+    mlm = PredictTotalMonth(dd)
+    print(mlm.predict_month(4))

@@ -13,5 +13,5 @@ git prediction project
 - [x] Predict when the date of next contribution: use distance between contributions as training data
 - [ ] Predict total contributions for a given 
     - [x] week
-    - [ ] month
+    - [x] month
     - [ ] year
