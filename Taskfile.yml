@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  api:
+    cmds:
+      - flask --debug --app api run
+    silent: true

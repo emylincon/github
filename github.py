@@ -62,6 +62,9 @@ class Contributions:
         query = {
             "query": f"{self.get_query_data(username, start_date, end_date)}"}
         response = requests.post(self.url, json=query, headers=self.header)
+        if response.status_code != 200:
+            # TODO: handle error
+            return json.loads(response.content.decode("utf-8"))
         return response.json()
 
 

@@ -4,6 +4,7 @@ argon2-cffi==21.3.0
 argon2-cffi-bindings==21.2.0
 asttokens==2.0.5
 attrs==21.4.0
+autopep8==1.7.0
 backcall==0.2.0
 beautifulsoup4==4.11.1
 bleach==5.0.0
@@ -20,6 +21,7 @@ defusedxml==0.7.1
 entrypoints==0.4
 executing==0.8.3
 fastjsonschema==2.15.3
+Flask==2.2.2
 fonttools==4.33.3
 gitdb==4.0.9
 GitPython==3.1.27
@@ -29,6 +31,7 @@ ipykernel==6.13.0
 ipython==8.3.0
 ipython-genutils==0.2.0
 ipywidgets==7.7.0
+itsdangerous==2.1.2
 jedi==0.18.1
 Jinja2==3.1.2
 joblib==1.1.0
@@ -62,6 +65,7 @@ psutil==5.9.1
 ptyprocess==0.7.0
 pure-eval==0.2.2
 pyarrow==8.0.0
+pycodestyle==2.9.1
 pycparser==2.21
 pydeck==0.7.1
 Pygments==2.12.0
@@ -96,5 +100,6 @@ validators==0.19.0
 watchdog==2.1.8
 wcwidth==0.2.5
 webencodings==0.5.1
+Werkzeug==2.2.2
 widgetsnbextension==3.6.0
 zipp==3.8.0
