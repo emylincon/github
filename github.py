@@ -25,7 +25,7 @@ class Contributions:
 
     @property
     def template(self):
-        return """query { 
+        return """query {
         user(login: "{{ username }}") {
           email
           createdAt
@@ -35,22 +35,22 @@ class Contributions:
               weeks {
                 contributionDays {
                   weekday
-                  date 
-                  contributionCount 
+                  date
+                  contributionCount
                   color
                 }
               }
               months  {
                 name
                   year
-                  firstDay 
-                totalWeeks 
-                
+                  firstDay
+                totalWeeks
+
               }
             }
           }
         }
-        
+
       }
       """
 
@@ -142,6 +142,7 @@ class PredictNext(ML):
 
     def __init__(self, raw_data) -> None:
         self.last = 1
+        self.max_result_days = 365
         super().__init__(raw_data=raw_data)
 
     def data_prep(self):
@@ -167,9 +168,11 @@ class PredictNext(ML):
             input_data = [[tomorrow.month, tomorrow.day, self.last]]
             raw_result = self.model.predict(input_data)
             result = abs(round(raw_result[0]))
+            if result > self.max_result_days:
+                result = self.max_result_days
             date = tomorrow + datetime.timedelta(days=result)
             return {"days": result, "date": date}
-        return {"error": "model is None"}
+        return {"error": "model has not been trained"}
 
 
 class PredictTotalWeek(ML):
@@ -181,7 +184,7 @@ class PredictTotalWeek(ML):
         super().__init__(raw_data=raw_data)
 
     def week_of_month(self, dt):
-        """ 
+        """
         Returns the week of the month for the specified date.
         """
         first_day = dt.replace(day=1)
