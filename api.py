@@ -1,5 +1,4 @@
 import json
-from urllib import response
 from flask import Flask, jsonify
 from github import Contributions, Statistics
 
