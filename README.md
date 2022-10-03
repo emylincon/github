@@ -15,7 +15,3 @@ git prediction project
     - [x] week
     - [x] month
     - [x] year
-
-
-# talk
-_ test
