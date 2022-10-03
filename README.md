@@ -11,7 +11,11 @@ git prediction project
 
 # Questions (ML)
 - [x] Predict when the date of next contribution: use distance between contributions as training data
-- [x] Predict total contributions for a given 
+- [x] Predict total contributions for a given
     - [x] week
     - [x] month
     - [x] year
+
+
+# talk
+_ test
