@@ -6,6 +6,9 @@ import pandas as pd
 import datetime as dt
 from Regression import BestModel
 from math import ceil
+from typing import Any
+
+default_date: dt.datetime = dt.datetime(1, 1, 1, 0, 0)
 
 
 class Contributions:
@@ -16,7 +19,7 @@ class Contributions:
 
     @staticmethod
     def get_date_range(start: dt.datetime, end: dt.datetime) -> str:
-        if start:
+        if start == default_date:
             def strf(x): return x.strftime('%Y-%m-%dT%H:%M:%SZ')
             return f'(from: "{strf(start)}", to: "{strf(end)}")'
         else:
@@ -53,11 +56,11 @@ class Contributions:
       }
       """
 
-    def get_query_data(self, username, start, end):
+    def get_query_data(self, username: str, start: dt.datetime, end: dt.datetime) -> str:
         t = Template(self.template)
         return t.render(username=username, date_range=self.get_date_range(start, end))
 
-    def get_query(self, username, start_date=None, end_date=None):
+    def get_query(self, username: str, start_date: dt.datetime = default_date, end_date: dt.datetime = default_date) -> Any:
         query = {
             "query": f"{self.get_query_data(username, start_date, end_date)}"}
         response = requests.post(self.url, json=query, headers=self.header)
@@ -68,13 +71,14 @@ class Contributions:
 
 
 class Statistics:
-    def __init__(self, data):
-        self.data = data
-        self.total_contributions = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["totalContributions"]
-        self.tf_data = self.days_contribution()
+    def __init__(self, data: dict):
+        self.data: dict = data
+        self.total_contributions: int = data["data"]["user"][
+            "contributionsCollection"]["contributionCalendar"]["totalContributions"]
+        self.tf_data: pd.DataFrame = self.days_contribution()
 
-    def days_contribution(self):
-        data = []
+    def days_contribution(self) -> pd.DataFrame:
+        data: list = []
         for week in self.data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
             for day in week["contributionDays"]:
                 data.append(
@@ -85,7 +89,7 @@ class Statistics:
         df['month'] = [df.iloc[i].date.month_name() for i in range(len(df))]
         return df
 
-    def most_contribution_day(self):
+    def most_contribution_day(self) -> pd.DataFrame:
         id_max = self.tf_data.contribution.idxmax()
         return self.tf_data.iloc[id_max]
 
