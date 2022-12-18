@@ -4,7 +4,6 @@ from github import Contributions, Statistics
 
 app: Flask = Flask(__name__)
 con_obj: Contributions = Contributions()
-
 VERSION: str = "v1"
 
 
@@ -14,7 +13,7 @@ def root() -> Response:
 
 
 @app.route(f"/{VERSION}/<string:username>/contributions/day/<string:kind>", methods=["GET"])
-def day_contributions(username, kind) -> Response:
+def day_contributions(username: str, kind: str) -> Response:
     data = con_obj.get_query(username)
     with open("emeka", "w") as file:
         json.dump(data, file, indent=4)
