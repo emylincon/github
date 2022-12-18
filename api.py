@@ -1,5 +1,5 @@
-import json
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify
+from flask.wrappers import Response
 from github import Contributions, Statistics
 
 app: Flask = Flask(__name__)
@@ -14,10 +14,7 @@ def root() -> Response:
 
 @app.route(f"/{VERSION}/<string:username>/contributions/day/<string:kind>", methods=["GET"])
 def day_contributions(username: str, kind: str) -> Response:
-    data = con_obj.get_query(username)
-    with open("emeka", "w") as file:
-        json.dump(data, file, indent=4)
-
+    data: dict = con_obj.get_query(username)
     stat_obj: Statistics = Statistics(data=data)
     response: dict
     if kind == "most":

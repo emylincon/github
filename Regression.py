@@ -1,70 +1,68 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from typing import Any
 
 
 class Prep:
     def prepx(self, x: list, degree: int, include_bias: bool = False):
         if len(np.array(x).shape) == 1:
-            x = np.array(x).reshape((-1, 1))
+            x = np.array(x).reshape((-1, 1)).tolist()
         transformer = PolynomialFeatures(
             degree=degree, include_bias=include_bias)
         return transformer.fit_transform(x)
 
 
 class Predictor(Prep):
-    def __init__(self, model, degree: int) -> None:
-        self.model = model
-        self.degree = degree
+    def __init__(self, model: LinearRegression, degree: int) -> None:
+        self.model: LinearRegression = model
+        self.degree: int = degree
 
-    def predict(self, x: list):
+    def predict(self, x: list) -> np.ndarray:
         x_ = self.prepx(x, self.degree)
         return self.model.predict(x_)
 
 
 class Model:
-    def __init__(self, x, y, degree, model):
-        self.x = x
-        self.y = y
-        self.degree = degree
-        self.model = model
-        self.score = self.model.score(self.x, y)
+    def __init__(self, x: Any, y: np.ndarray, degree: int, model: LinearRegression):
+        self.x: Any = x
+        self.y: np.ndarray = y
+        self.degree: int = degree
+        self.model: LinearRegression = model
+        self.score: float = float(self.model.score(self.x, y))
 
 
 class BestModel(Prep):
     def __init__(self, x: list, y: list, max_compare_length: int = 10) -> None:
-        self.x = x
-        self.y = np.array(y)
+        self.x: Any = x
+        self.y: np.ndarray = np.array(y)
         self.max_compare_length = max_compare_length
 
-    def get_model(self, degree: int):
+    def get_model(self, degree: int) -> Model:
         x_ = self.prepx(self.x, degree)
-        model = LinearRegression().fit(x_, self.y)
+        model: LinearRegression = LinearRegression().fit(x_, self.y)
         return Model(x_, self.y, degree, model)
 
-    def compute_best_model(self):
+    def compute_best_model(self) -> Predictor:
         models = [self.get_model(i) for i in range(2, self.max_compare_length)]
-        # model_scores = {m.degree: m.score for m in models}
-        # print(model_scores)
-        best = None
-        for m in models:
-            if best is None:
-                best = m
-                continue
+
+        best: Model = models[0]
+        for m in models[1:]:
             if m.score == best.score:
                 continue
             elif m.score == 1:
                 break
             elif m.score >= 0.95 and best.score >= 0.95:
-                tmp = {m: m.score, best: best.score}
-                best = min(tmp, key=tmp.get)
+                tmp: dict[Model, float] = {m: m.score, best: best.score}
+                best = min(tmp, key=lambda x: tmp[x])
             else:
                 tmp = {m: m.score, best: best.score}
-                best = max(tmp, key=tmp.get)
-
-        # print("best score =", best.score, "degree =", best.degree)
+                best = max(tmp, key=lambda x: tmp[x])
         return Predictor(best.model, best.degree)
 
+
+NONE_PREDICTOR: Predictor = Predictor(
+    LinearRegression().fit(Prep().prepx([1], 1), np.array([1])), 0)
 
 if __name__ == "__main__":
     xi = [5, 15, 25, 35, 45, 55]
