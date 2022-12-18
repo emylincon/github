@@ -90,7 +90,7 @@ class Statistics:
         return df
 
     def most_contribution_day(self) -> pd.DataFrame:
-        id_max = self.tf_data.contribution.idxmax()
+        id_max: int = self.tf_data.contribution.idxmax()
         return self.tf_data.iloc[id_max]
 
     def weekday_contributions(self):
