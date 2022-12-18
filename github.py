@@ -127,7 +127,7 @@ class ML:
         self.max_compare_length: int = max_compare_length
         self.get_model()
 
-    def data_prep(self) -> tuple:
+    def data_prep(self) -> tuple[list[Any], list[Any]]:
         return ([], [])
 
     def get_model(self):
@@ -150,7 +150,7 @@ class PredictNext(ML):
         self.max_result_days: int = 365
         super().__init__(raw_data=raw_data)
 
-    def data_prep(self) -> tuple:
+    def data_prep(self) -> tuple[list[list[int]], list[int]]:
 
         x_series: list[list[int]] = []
         y_series: list[int] = []
@@ -201,7 +201,7 @@ class PredictTotalWeek(ML):
 
         return int(ceil(adjusted_dom/7.0))
 
-    def data_prep(self) -> tuple:
+    def data_prep(self) -> tuple[list[list[int]], list[int]]:
         x_series: list[list[int]] = []
         y_series: list[int] = []
         current_week_date: dt.datetime = NONE_DATE
