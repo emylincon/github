@@ -3,28 +3,27 @@ import requests
 from jinja2 import Template
 import os
 import pandas as pd
-import datetime
+import datetime as dt
 from Regression import BestModel
 from math import ceil
 
 
 class Contributions:
     def __init__(self):
-        self.url = 'https://api.github.com/graphql'
-        self.token = os.getenv('GITHUB_PERSONAL_TOKEN')
-        self.header = {'Authorization': f'bearer {self.token}'}
+        self.url: str = 'https://api.github.com/graphql'
+        self.token: str = os.getenv('GITHUB_PERSONAL_TOKEN')
+        self.header: dict = {'Authorization': f'bearer {self.token}'}
 
     @staticmethod
-    def get_date_range(start, end):
+    def get_date_range(start: dt.datetime, end: dt.datetime) -> str:
         if start:
-            start, end = start.strftime(
-                '%Y-%m-%dT%H:%M:%SZ'), end.strftime('%Y-%m-%dT%H:%M:%SZ')
-            return f'(from: "{start}", to: "{end}")'
+            def strf(x): return x.strftime('%Y-%m-%dT%H:%M:%SZ')
+            return f'(from: "{strf(start)}", to: "{strf(end)}")'
         else:
             return ""
 
     @property
-    def template(self):
+    def template(self) -> str:
         return """query {
         user(login: "{{ username }}") {
           email
@@ -151,7 +150,7 @@ class PredictNext(ML):
         diff = 0
         for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
             for day in week["contributionDays"]:
-                date = datetime.datetime.strptime(day["date"], '%Y-%m-%d')
+                date = dt.datetime.strptime(day["date"], '%Y-%m-%d')
                 x_series.append([date.month, date.day, self.last])
                 if day["contributionCount"] == 0:
                     diff += 1
@@ -164,13 +163,13 @@ class PredictNext(ML):
 
     def predict_next(self) -> dict:
         if self.model:
-            tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+            tomorrow = dt.datetime.now() + dt.timedelta(days=1)
             input_data = [[tomorrow.month, tomorrow.day, self.last]]
             raw_result = self.model.predict(input_data)
             result = abs(round(raw_result[0]))
             if result > self.max_result_days:
                 result = self.max_result_days
-            date = tomorrow + datetime.timedelta(days=result)
+            date = tomorrow + dt.timedelta(days=result)
             return {"days": result, "date": date}
         return {"error": "model has not been trained"}
 
@@ -202,7 +201,7 @@ class PredictTotalWeek(ML):
 
         for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
             for day in week["contributionDays"]:
-                date = datetime.datetime.strptime(day["date"], '%Y-%m-%d')
+                date = dt.datetime.strptime(day["date"], '%Y-%m-%d')
                 if current_week_date is None:
                     current_week_date = date
                 # If dates are in same week
@@ -222,7 +221,7 @@ class PredictTotalWeek(ML):
         self.max_week_contribution = max(y_series)
         return x_series, y_series
 
-    def predict_week(self, week_date: datetime) -> dict:
+    def predict_week(self, week_date: dt.datetime) -> dict:
         if self.model:
             row = [self.week_of_month(week_date), week_date.isocalendar()[
                 1], week_date.month]
@@ -251,7 +250,7 @@ class PredictTotalMonth(ML):
 
         for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
             for day in week["contributionDays"]:
-                date = datetime.datetime.strptime(day["date"], '%Y-%m-%d')
+                date = dt.datetime.strptime(day["date"], '%Y-%m-%d')
                 if current_month is None:
                     current_month = date.month
                 # If dates are in same month
@@ -272,7 +271,7 @@ class PredictTotalMonth(ML):
 
     def predict_month(self, month: int) -> dict:
         if self.model:
-            input_data = [month]
+            input_data: list[int] = [month]
             raw_result = self.model.predict(input_data)
             result = abs(round(raw_result[0]))
             if result > (3*self.max_month_contribution):
@@ -294,7 +293,7 @@ class PredictTotalYear:
         def get_value(no): return abs(
             round(self.monthModel.predict_month(no)["totalPredictedContribution"]))
         result = sum(get_value(i) for i in range(1, 13))
-        return {"totalPredictedContribution": result, "year": datetime.datetime.now().year}
+        return {"totalPredictedContribution": result, "year": dt.datetime.now().year}
 
 
 if __name__ == "__main__":
@@ -306,7 +305,7 @@ if __name__ == "__main__":
     # print("ML =>", ml.predict_next())
     # mlw = PredictTotalWeek(dd)
     # for i in range(1, 49, 7):
-    #     next_week = datetime.datetime.now() + datetime.timedelta(days=i)
+    #     next_week = dt.datetime.now() + dt.timedelta(days=i)
     #     print("MLW =>", mlw.predict_week(next_week))
     mlm = PredictTotalMonth(dd)
     print(mlm.predict_month(4))
