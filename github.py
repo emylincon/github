@@ -57,16 +57,16 @@ class Contributions:
       """
 
     def get_query_data(self, username: str, start: dt.datetime, end: dt.datetime) -> str:
-        t = Template(self.template)
+        t: Template = Template(self.template)
         return t.render(username=username, date_range=self.get_date_range(start, end))
 
-    def get_query(self, username: str, start_date: dt.datetime = default_date, end_date: dt.datetime = default_date) -> Any:
-        query = {
+    def get_query(self, username: str, start_date: dt.datetime = default_date, end_date: dt.datetime = default_date) -> dict:
+        query: dict = {
             "query": f"{self.get_query_data(username, start_date, end_date)}"}
-        response = requests.post(self.url, json=query, headers=self.header)
+        response: requests.Response = requests.post(
+            self.url, json=query, headers=self.header)
         if response.status_code != 200:
-            # TODO: handle error
-            return json.loads(response.content.decode("utf-8"))
+            return {"error": json.loads(response.content.decode("utf-8"))}
         return response.json()
 
 
@@ -83,7 +83,7 @@ class Statistics:
             for day in week["contributionDays"]:
                 data.append(
                     {"date": day["date"], "contribution": day["contributionCount"]})
-        df = pd.DataFrame(data)
+        df: pd.DataFrame = pd.DataFrame(data)
         df.date = pd.to_datetime(df.date, infer_datetime_format=True)
         df['day'] = [df.iloc[i].date.day_name() for i in range(len(df))]
         df['month'] = [df.iloc[i].date.month_name() for i in range(len(df))]
