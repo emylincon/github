@@ -5,3 +5,6 @@ tasks:
     cmds:
       - flask --debug --app api run
     silent: true
+  test:
+    cmds:
+      - pytest
