@@ -2,10 +2,12 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from typing import Any
+from functools import cache
 
 
 class Prep:
-    def prepx(self, x: list, degree: int, include_bias: bool = False):
+    @cache
+    def prepx(self, x: tuple, degree: int, include_bias: bool = False):
         if len(np.array(x).shape) == 1:
             x = np.array(x).reshape((-1, 1)).tolist()
         transformer = PolynomialFeatures(
@@ -18,7 +20,8 @@ class Predictor(Prep):
         self.model: LinearRegression = model
         self.degree: int = degree
 
-    def predict(self, x: list) -> np.ndarray:
+    @cache
+    def predict(self, x: tuple) -> np.ndarray:
         x_ = self.prepx(x, self.degree)
         return self.model.predict(x_)
 
@@ -33,7 +36,7 @@ class Model:
 
 
 class BestModel(Prep):
-    def __init__(self, x: list, y: list, max_compare_length: int = 10) -> None:
+    def __init__(self, x: tuple, y: tuple, max_compare_length: int = 10) -> None:
         self.x: Any = x
         self.y: np.ndarray = np.array(y)
         self.max_compare_length = max_compare_length
@@ -62,11 +65,11 @@ class BestModel(Prep):
 
 
 NONE_PREDICTOR: Predictor = Predictor(
-    LinearRegression().fit(Prep().prepx([1], 1), np.array([1])), 0)
+    LinearRegression().fit(Prep().prepx((1,), 1), np.array([1])), 0)
 
 if __name__ == "__main__":
-    xi = [5, 15, 25, 35, 45, 55]
-    yi = [5, 20, 14, 32, 22, 38]
+    xi = (5, 15, 25, 35, 45, 55)
+    yi = (5, 20, 14, 32, 22, 38)
     my_obj = BestModel(xi, yi)
     p = my_obj.compute_best_model()
-    p.predict([25])
+    p.predict((25,))

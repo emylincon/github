@@ -8,7 +8,6 @@ from Regression import BestModel, Predictor, NONE_PREDICTOR
 from math import ceil
 from typing import Any
 
-
 NONE_DATE: dt.datetime = dt.datetime(1, 1, 1, 0, 0)
 
 
@@ -127,8 +126,8 @@ class ML:
         self.max_compare_length: int = max_compare_length
         self.get_model()
 
-    def data_prep(self) -> tuple[list[Any], list[Any]]:
-        return ([], [])
+    def data_prep(self) -> tuple[tuple, tuple]:
+        return (tuple(), tuple())
 
     def get_model(self):
         prepared = self.data_prep()
@@ -150,16 +149,16 @@ class PredictNext(ML):
         self.max_result_days: int = 365
         super().__init__(raw_data=raw_data)
 
-    def data_prep(self) -> tuple[list[list[int]], list[int]]:
+    def data_prep(self) -> tuple[tuple[tuple[int, int, int], ...], tuple[int, ...]]:
 
-        x_series: list[list[int]] = []
+        x_series: list[tuple[int, int, int]] = []
         y_series: list[int] = []
         diff: int = 0
         for week in self.raw_data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]:
             for day in week["contributionDays"]:
                 date: dt.datetime = dt.datetime.strptime(
                     day["date"], '%Y-%m-%d')
-                x_series.append([date.month, date.day, self.last])
+                x_series.append((date.month, date.day, self.last))
                 if day["contributionCount"] == 0:
                     diff += 1
                     y_series.append(diff)
@@ -167,13 +166,13 @@ class PredictNext(ML):
                     diff = 0
                     y_series.append(diff)
                 self.last += 1
-        return x_series, y_series
+        return tuple(x_series), tuple(y_series)
 
     def predict_next(self) -> dict[str, Any]:
         if self.model is not NONE_PREDICTOR:
             tomorrow: dt.datetime = dt.datetime.now() + dt.timedelta(days=1)
-            input_data: list[list[int]] = [
-                [tomorrow.month, tomorrow.day, self.last]]
+            input_data: tuple[tuple[int, int, int]] = (
+                (tomorrow.month, tomorrow.day, self.last),)
             raw_result = self.model.predict(input_data)
             result = abs(round(raw_result[0]))
             if result > self.max_result_days:
@@ -201,8 +200,8 @@ class PredictTotalWeek(ML):
 
         return int(ceil(adjusted_dom/7.0))
 
-    def data_prep(self) -> tuple[list[list[int]], list[int]]:
-        x_series: list[list[int]] = []
+    def data_prep(self):  # tuple[tuple[tuple[int], ...], tuple[int, ...]]
+        x_series: list[tuple[int, ...]] = []
         y_series: list[int] = []
         current_week_date: dt.datetime = NONE_DATE
         current_week_contribution: int = 0
@@ -221,19 +220,19 @@ class PredictTotalWeek(ML):
                         continue
                     row: list[int] = [self.week_of_month(current_week_date), current_week_date.isocalendar()[
                         1], current_week_date.month]
-                    x_series.append(row)
+                    x_series.append(tuple(row))
                     y_series.append(current_week_contribution)
                     # reset current week contribution
                     current_week_contribution = day["contributionCount"]
                     current_week_date = date
         self.max_week_contribution = max(y_series)
-        return x_series, y_series
+        return tuple(x_series), tuple(y_series)
 
     def predict_week(self, week_date: dt.datetime) -> dict[str, Any]:
         if self.model is not NONE_PREDICTOR:
-            row = [self.week_of_month(week_date), week_date.isocalendar()[
-                1], week_date.month]
-            input_data = [row]
+            row = (self.week_of_month(week_date), week_date.isocalendar()[
+                1], week_date.month)
+            input_data: tuple = (row,)
             raw_result = self.model.predict(input_data)
             result = abs(round(raw_result[0]))
             if result > (2*self.max_week_contribution):
@@ -251,7 +250,7 @@ class PredictTotalMonth(ML):
         super().__init__(raw_data=raw_data)
 
     def data_prep(self):
-        x_series: list[list[int]] = []
+        x_series: list[tuple[int]] = []
         y_series: list[int] = []
         current_month = None
         current_month_contribution: int = 0
@@ -269,17 +268,17 @@ class PredictTotalMonth(ML):
                         current_month = date.month
                         continue
                     row: list[int] = [current_month]
-                    x_series.append(row)
+                    x_series.append(tuple(row))
                     y_series.append(current_month_contribution)
                     # reset current month contribution
                     current_month_contribution = day["contributionCount"]
                     current_month = date.month
         self.max_month_contribution = max(y_series)
-        return x_series, y_series
+        return tuple(x_series), tuple(y_series)
 
     def predict_month(self, month: int) -> dict[str, Any]:
         if self.model is not NONE_PREDICTOR:
-            input_data: list[int] = [month]
+            input_data: tuple[int] = (month,)
             raw_result = self.model.predict(input_data)
             result = abs(round(raw_result[0]))
             if result > (3*self.max_month_contribution):
