@@ -34,11 +34,11 @@ class TestBasic(unittest.TestCase):
         pass
 
     def test_regression(self):
-        xi = [5, 15, 25, 35, 45, 55]
-        yi = [5, 20, 14, 32, 22, 38]
+        xi = (5, 15, 25, 35, 45, 55)
+        yi = (5, 20, 14, 32, 22, 38)
         my_obj = BestModel(xi, yi)
         p = my_obj.compute_best_model()
-        result = p.predict([25])[0]
+        result = p.predict((25,))[0]
         self.assertIsInstance(result, float)
 
 
