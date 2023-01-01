@@ -31,7 +31,6 @@ def root() -> Response:
 @app.route(f"/{VERSION}/<string:username>/contributions/day/<string:kind>", methods=["GET"])
 @app.route("/latest/<string:username>/contributions/day/<string:kind>", methods=["GET"])
 def day_contributions(username: str, kind: str) -> Response:
-    print(f"*******\n\n{ENVIRONMENT=}\n\n********")
     data: dict = get_data(username)
 
     stat_obj: Statistics = Statistics(data=data)
