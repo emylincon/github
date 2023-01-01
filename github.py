@@ -94,6 +94,13 @@ class Statistics:
         id_max: int = int(self.tf_data.contribution.idxmax())
         return self.tf_data.iloc[id_max]
 
+    def least_contribution_day(self) -> pd.DataFrame:
+        least: int = self.tf_data.contribution.min()
+        return self.tf_data.loc[self.tf_data.contribution == least]
+
+    def avg_contribution_day(self) -> float:
+        return self.tf_data.contribution.mean()
+
     def weekday_contributions(self) -> pd.DataFrame:
         return self.tf_data.groupby(by="day").sum().sort_values(by=['contribution'], ascending=False)
 

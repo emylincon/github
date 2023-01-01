@@ -22,7 +22,7 @@ class TestApi(unittest.TestCase):
         """:arg
         this runs before each test
         """
-        pass
+        self.test_username = "emylincon"
 
     def tearDown(self):
         """:arg
@@ -30,7 +30,7 @@ class TestApi(unittest.TestCase):
         """
         pass
 
-    def test_regression(self):
+    def test_root(self):
         responses = [self.server.get(i)
                      for i in ('/latest', '/', f'/{VERSION}')]
 
@@ -38,6 +38,24 @@ class TestApi(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
             result = json.loads(response.data.decode('utf-8'))
-            assert type(result) is dict
+            self.assertEqual(result['api_version'], VERSION)
+            self.assertIsInstance(result, dict)
+
+    def test_contributions(self):
+        """
+        test endpoint: "/latest/<string:username>/contributions/day/<string:kind>
+        """
+        def get_url(version: str, kind: str) -> str:
+            return f"/{version}/{self.test_username}/contributions/day/{kind}"
+        kinds = ("average", "least", "most")
+        urls = [get_url("latest", i) for i in kinds] + \
+            [get_url(VERSION, i) for i in kinds]
+        responses = [self.server.get(i)
+                     for i in urls]
+
+        for response in responses:
+            self.assertEqual(response.status_code, 200)
+
+            result = json.loads(response.data.decode('utf-8'))
             self.assertEqual(result['api_version'], VERSION)
             self.assertIsInstance(result, dict)
