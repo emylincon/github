@@ -108,6 +108,14 @@ class TestStatistics(unittest.TestCase):
         data = self.trans.most_contribution_day()
         self.assertIsInstance(data.contribution, int64)
 
+    def test_least_contribution_day(self):
+        data = self.trans.least_contribution_day()
+        self.assertIsInstance(data.to_dict(), dict)
+
+    def test_avg_contribution_day(self):
+        data = self.trans.avg_contribution_day()
+        self.assertIsInstance(data, float)
+
     def test_average_contribution_per_month(self):
         result = self.trans.average_contribution_per_month()
         self.assertIsInstance(result, int)
