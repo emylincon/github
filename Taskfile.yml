@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 tasks:
   api:
@@ -7,4 +7,4 @@ tasks:
     silent: true
   test:
     cmds:
-      - pytest
+      - export ENVIRONMENT=test; pytest
