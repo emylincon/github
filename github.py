@@ -90,9 +90,9 @@ class Statistics:
         df['month'] = [df.iloc[i].date.month_name() for i in range(len(df))]
         return df
 
-    def most_contribution_day(self) -> pd.Series:
-        id_max: int = int(self.tf_data.contribution.idxmax())
-        return self.tf_data.iloc[id_max]
+    def most_contribution_day(self) -> pd.DataFrame:
+        most: int = int(self.tf_data.contribution.max())
+        return self.tf_data.loc[self.tf_data.contribution == most]
 
     def least_contribution_day(self) -> pd.DataFrame:
         least: int = self.tf_data.contribution.min()

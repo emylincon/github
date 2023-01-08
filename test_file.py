@@ -106,7 +106,7 @@ class TestStatistics(unittest.TestCase):
 
     def test_most_contribution_day(self):
         data = self.trans.most_contribution_day()
-        self.assertIsInstance(data.contribution, int64)
+        self.assertIsInstance(data.to_dict(), dict)
 
     def test_least_contribution_day(self):
         data = self.trans.least_contribution_day()
