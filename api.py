@@ -3,6 +3,7 @@ from flask.wrappers import Response
 from github import Contributions, Statistics
 import json
 from dotenv import load_dotenv
+import pandas as pd
 import os
 
 app: Flask = Flask(__name__)
@@ -36,11 +37,22 @@ def day_contributions(username: str, kind: str) -> Response:
     stat_obj: Statistics = Statistics(data=data)
     response: dict
     if kind == "most":
-        response = stat_obj.most_contribution_day().to_dict()
+        result: pd.DataFrame = stat_obj.most_contribution_day()
+        response = {
+            "most_contribution": int(result.contribution.max()),
+            "dates": (dates := result.date.to_list()),
+            "total_days": len(dates)
+        }
     elif kind == "average":
-        response = {"average_day_contribution": stat_obj.avg_contribution_day()}
+        response = {"average_day_contribution": round(
+            stat_obj.avg_contribution_day())}
     elif kind == "least":
-        response = stat_obj.least_contribution_day().to_dict()
+        result = stat_obj.least_contribution_day()
+        response = {
+            "least_contribution": int(result.contribution.max()),
+            "dates": (dates := result.date.to_list()),
+            "total_days": len(dates)
+        }
     else:
         response = {"error": f"kind '{kind}' is not supported"}
     return jsonify({"api_version": VERSION, "response": response})
