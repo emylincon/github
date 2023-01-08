@@ -40,8 +40,8 @@ def day_contributions(username: str, kind: str) -> Response:
         result: pd.DataFrame = stat_obj.most_contribution_day()
         response = {
             "most_contribution": int(result.contribution.max()),
-            "dates": (a := result.date.to_list()),
-            "total_days": len(a)
+            "dates": (dates := result.date.to_list()),
+            "total_days": len(dates)
         }
     elif kind == "average":
         response = {"average_day_contribution": round(
@@ -50,8 +50,8 @@ def day_contributions(username: str, kind: str) -> Response:
         result = stat_obj.least_contribution_day()
         response = {
             "least_contribution": int(result.contribution.max()),
-            "dates": (a := result.date.to_list()),
-            "total_days": len(a)
+            "dates": (dates := result.date.to_list()),
+            "total_days": len(dates)
         }
     else:
         response = {"error": f"kind '{kind}' is not supported"}
