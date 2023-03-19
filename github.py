@@ -61,7 +61,9 @@ class Contributions:
         t: Template = Template(self.template)
         return t.render(username=username, date_range=self.get_date_range(start, end))
 
-    def get_query(self, username: str, start_date: dt.datetime = NONE_DATE, end_date: dt.datetime = NONE_DATE) -> dict:
+    def get_query(self, username: str, start_date: dt.datetime = NONE_DATE, end_date: dt.datetime = dt.datetime.now()) -> dict:
+        if start_date == NONE_DATE:
+            start_date = end_date - dt.timedelta(days=365)
         query: dict = {
             "query": f"{self.get_query_data(username, start_date, end_date)}"}
         response: requests.Response = requests.post(
