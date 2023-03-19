@@ -33,6 +33,8 @@ def root() -> Response:
 @app.route("/latest/<string:username>/contributions/day/<string:kind>", methods=["GET"])
 def day_contributions(username: str, kind: str) -> Response:
     data: dict = get_data(username)
+    if "error" in data:
+        return jsonify(data)
 
     stat_obj: Statistics = Statistics(data=data)
     response: dict
@@ -56,3 +58,7 @@ def day_contributions(username: str, kind: str) -> Response:
     else:
         response = {"error": f"kind '{kind}' is not supported"}
     return jsonify({"api_version": VERSION, "response": response})
+
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
